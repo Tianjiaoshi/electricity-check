@@ -1,0 +1,63 @@
+name: 电费查询定时任务
+
+# 触发条件
+on:
+  # 定时触发 - 重要！这里设置执行时间
+  schedule:
+    # 第一种：每天北京时间8点和20点执行（推荐）
+    - cron: '0 0,12 * * *'  # 每天UTC时间的0点和12点
+    
+    # 第二种：每天8点、12点、20点执行
+    # - cron: '0 0,4,12 * * *'  # 每天UTC时间的0点、4点、12点
+    
+    # 第三种：每天8点执行一次
+    # - cron: '0 0 * * *'  # 每天UTC时间的0点
+    
+    # 第四种：每2小时执行一次（测试用，实际不要频繁）
+    # - cron: '0 */2 * * *'  # 每2小时执行一次
+  
+  # 手动触发：可以在GitHub页面上手动点击运行
+  workflow_dispatch:
+  
+  # 代码推送时也运行（可选）
+  push:
+    branches: [ main ]
+    paths: [ 'electricity_check.py' ]
+
+# 工作流内容
+jobs:
+  check-electricity:  # 任务名称
+    runs-on: ubuntu-latest  # 运行环境：最新的Ubuntu系统
+    
+    # 步骤列表
+    steps:
+    # 第一步：获取代码
+    - name: 获取代码
+      uses: actions/checkout@v3  # 官方动作：下载代码
+    
+    # 第二步：设置Python环境
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # 使用Python 3.9版本
+    
+    # 第三步：安装依赖
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip  # 升级pip
+        pip install requests  # 安装requests库
+    
+    # 第四步：运行电费查询脚本
+    - name: 运行电费查询
+      env:  # 设置环境变量（敏感信息）
+        WECHAT_WORK_WEBHOOK: ${{ secrets.WECHAT_WORK_WEBHOOK }}
+        JSESSIONID: ${{ secrets.JSESSIONID }}
+      run: python electricity_check.py  # 运行Python脚本
+    
+    # 第五步：任务完成通知（可选）
+    - name: 任务完成通知
+      if: always()  # 无论成功失败都执行
+      run: |
+        echo "🎉 电费查询任务执行完成"
+        echo "📅 执行时间: $(date)"
+        echo "📋 查看企业微信群是否收到消息"
