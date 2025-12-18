@@ -9,7 +9,7 @@ import re
 # --- 1. 配置区域---
 # 从环境变量（GitHub Secrets）中加载所有敏感信息
 WECHAT_WORK_WEBHOOK = os.environ.get('WECHAT_WORK_WEBHOOK', 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=98b7363a-4829-4bd3-9452-cc40a6c4415f')
-JSESSIONID = os.environ.get('JSESSIONID', 'B7DD99481F78C0C02F8D9C5C6C841313')
+JSESSIONID = os.environ.get('JSESSIONID', '27C908135783AB1DBF6CEFC8E2A982FF')
 
 # 检查所有必需的密钥（Secrets）是否已成功加载
 if not all([WECHAT_WORK_WEBHOOK, JSESSIONID]):
