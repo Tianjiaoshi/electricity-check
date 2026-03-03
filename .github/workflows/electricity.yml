@@ -1,63 +1,39 @@
-name: 电费查询定时任务
+name: Check Electricity
 
-# 触发条件
 on:
-  # 定时触发 - 重要！这里设置执行时间
   schedule:
-    # 第一种：每天北京时间8点和20点执行（推荐）
-    - cron: '0 0,12 * * *'  # 每天UTC时间的0点和12点
-    
-    # 第二种：每天8点、12点、20点执行
-    # - cron: '0 0,4,12 * * *'  # 每天UTC时间的0点、4点、12点
-    
-    # 第三种：每天8点执行一次
-    # - cron: '0 0 * * *'  # 每天UTC时间的0点
-    
-    # 第四种：每2小时执行一次（测试用，实际不要频繁）
-    # - cron: '0 */2 * * *'  # 每2小时执行一次
-  
-  # 手动触发：可以在GitHub页面上手动点击运行
+    - cron: '0 0,12 * * *'   # 每天 UTC 0:00 和 12:00（北京时间 8:00 和 20:00）
   workflow_dispatch:
-  
-  # 代码推送时也运行（可选）
-  push:
-    branches: [ main ]
-    paths: [ 'electricity_check.py' ]
 
-# 工作流内容
 jobs:
-  check-electricity:  # 任务名称
-    runs-on: ubuntu-latest  # 运行环境：最新的Ubuntu系统
-    
-    # 步骤列表
+  check:
+    runs-on: ubuntu-latest
     steps:
-    # 第一步：获取代码
-    - name: 获取代码
-      uses: actions/checkout@v3  # 官方动作：下载代码
-    
-    # 第二步：设置Python环境
-    - name: 设置Python环境
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'  # 使用Python 3.9版本
-    
-    # 第三步：安装依赖
-    - name: 安装依赖
-      run: |
-        python -m pip install --upgrade pip  # 升级pip
-        pip install requests  # 安装requests库
-    
-    # 第四步：运行电费查询脚本
-    - name: 运行电费查询
-      env:  # 设置环境变量（敏感信息）
-        WECHAT_WORK_WEBHOOK: ${{ secrets.WECHAT_WORK_WEBHOOK }}
-        JSESSIONID: ${{ secrets.JSESSIONID }}
-      run: python electricity_check.py  # 运行Python脚本
-    
-    # 第五步：任务完成通知（可选）
-    - name: 任务完成通知
-      if: always()  # 无论成功失败都执行
-      run: |
-        echo "🎉 电费查询任务执行完成"
-        echo "📅 执行时间: $(date)"
-        echo "📋 查看企业微信群是否收到消息"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run electricity check script
+        env:
+          BASIC_AUTH: ${{ secrets.BASIC_AUTH }}
+          SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
+          USER_ID: ${{ secrets.USER_ID }}
+          TGC: ${{ secrets.TGC }}
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+          ALARM_THRESHOLD: ${{ secrets.ALARM_THRESHOLD }}   # 可选，默认为10
+          # 以下为可选，若硬编码在脚本中则无需设置
+          FEE_ITEM_ID: ${{ secrets.FEE_ITEM_ID }}
+          TYPE: ${{ secrets.TYPE }}
+          LEVEL: ${{ secrets.LEVEL }}
+          CAMPUS: ${{ secrets.CAMPUS }}
+          BUILDING: ${{ secrets.BUILDING }}
+          FLOOR: ${{ secrets.FLOOR }}
+          ROOM: ${{ secrets.ROOM }}
+        run: python scripts/check_electricity.py
