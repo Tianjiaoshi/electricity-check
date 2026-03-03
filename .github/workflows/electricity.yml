@@ -9,31 +9,31 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
       - name: Install dependencies
         run: pip install requests
-
-      - name: Run electricity check script
+      - name: Run electricity check
         env:
-          BASIC_AUTH: ${{ secrets.BASIC_AUTH }}
-          SYNJONES_AUTH: ${{ secrets.SYNJONES_AUTH }}
-          USER_ID: ${{ secrets.USER_ID }}
-          TGC: ${{ secrets.TGC }}
-          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
-          ALARM_THRESHOLD: ${{ secrets.ALARM_THRESHOLD }}   # 可选，默认为10
-          # 以下为可选，若硬编码在脚本中则无需设置
-          FEE_ITEM_ID: ${{ secrets.FEE_ITEM_ID }}
-          TYPE: ${{ secrets.TYPE }}
-          LEVEL: ${{ secrets.LEVEL }}
+          SYNJONES_AUTH_TOKEN: ${{ secrets.SYNJONES_AUTH_TOKEN }}
+          REQUEST_COOKIE: ${{ secrets.REQUEST_COOKIE }}
+          AUTHORIZATION: ${{ secrets.AUTHORIZATION }}
+          WECOM_WEBHOOK: ${{ secrets.WECOM_WEBHOOK }}
+          NOTIFY_MODE: ${{ secrets.NOTIFY_MODE }}
+          LOW_BALANCE_THRESHOLD: ${{ secrets.LOW_BALANCE_THRESHOLD }}
+          TARGETS_JSON: ${{ secrets.TARGETS_JSON }}
+          # 单目标参数（如果未使用 TARGETS_JSON，会用到这些）
           CAMPUS: ${{ secrets.CAMPUS }}
           BUILDING: ${{ secrets.BUILDING }}
           FLOOR: ${{ secrets.FLOOR }}
           ROOM: ${{ secrets.ROOM }}
+          FEEITEM_ID: ${{ secrets.FEEITEM_ID }}
+          FEE_TYPE: ${{ secrets.FEE_TYPE }}
+          FEE_LEVEL: ${{ secrets.FEE_LEVEL }}
+          # 其他可选
+          TARGET_QUERY_INTERVAL_SECONDS: ${{ secrets.TARGET_QUERY_INTERVAL_SECONDS }}
+          NOTIFY_ON_ERROR: ${{ secrets.NOTIFY_ON_ERROR }}
         run: python scripts/check_electricity.py
